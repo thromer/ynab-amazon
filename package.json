@@ -1,0 +1,27 @@
+{
+  "name": "@thromer/ynab-amazon",
+  "version": "0.0.1",
+  "description": "YNAB Amazon Updater",
+  "main": "example.js",
+  "types": "example.d.ts",
+  "private": "true",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thromer/ynab-amazon.git"
+  },
+  "author": "Ted Romer",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/thromer/ynab-amazon/issues"
+  },
+  "homepage": "https://github.com/thromer/ynab-amazon#readme",
+  "dependencies": {
+    "yauzl": "^2.10.0"
+  },
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.2",
+    "@types/node": "^20.3.3",
+    "@types/yauzl": "^2.10.0",
+    "typescript": "^5.1.6"
+  }
+}
