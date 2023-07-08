@@ -8,9 +8,9 @@
 import {open} from "node:fs/promises";
 import {parse} from "csv-parse";
 // import {promisify} from "util";
-import {fromFd} from "yauzl";
+import {fromFd} from "yauzl-promise";
 
-function promisify(api: any) {
+function xpromisify(api: any) {
   return function(...args: any[]) {
     return new Promise(function(resolve, reject) {
       api(...args, function(err: any, response: any) {
@@ -42,15 +42,20 @@ function promisify(api: any) {
 
 async function fun() {
   let path = "/home/ted/Downloads/Your Orders.zip";
+  let f = null;
+  let z = null;
   // error handling?
   open(path, "r")
     .then((f) => {
       console.log(f.fd)
-      return promisify(fromFd)(f.fd, {lazyEntries: true});
+      return fromFd(f.fd);  // , {lazyEntries: true});
     })
-    .then((z: any) => {   // y not inferred?  TODO
+    .then((zz) => {   // y not inferred?  TODO
+      z = zz;
       console.log(z);
-      z.on("entry", function(entry: any) {  // TODO
+      for (const entry of z) {
+      }
+      z.on("entry", function(entry) {  // TODO
 	handleEntry(entry, z);
       });
       z.on("end", function() {
@@ -65,7 +70,10 @@ async function fun() {
     .catch((error) => {
       console.log("boo");
       console.log(error);
-    })
+    }).finally() => {
+      z?.close();
+      f?.close();
+    }
 }
 
 async function handleEntry(entry: any, z: any) {  // TODO
@@ -80,7 +88,7 @@ async function handleEntry(entry: any, z: any) {  // TODO
       console.log('HERE WE GO I HOPE');
       // [Error: ESPIPE: invalid seek, read]
       if (false) {
-	promisify(z.openReadStream)(entry)
+	z.openReadStream(entry)
 	  .then((readStream: any) => {  // TODO
 	    readStream.on("end", function() {
 	      handleEnd(z);
@@ -121,5 +129,5 @@ function handleError(err: any) {  // TODO
 fun();
 
 // Local Variables:
-// compile-command: "tsc && node bar"
+// compile-command: "tsc && node barp"
 // End:
