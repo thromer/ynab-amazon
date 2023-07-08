@@ -130,3 +130,8 @@ dist
 .pnp.*
 
 package-lock.json
+
+src/*.js
+src/*.js.map
+
+*~
