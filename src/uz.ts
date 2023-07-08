@@ -1,4 +1,4 @@
-// import {parse} from "csv-parse";
+import {parse} from "csv-parse/sync";
 // import {open} from "node:fs/promises";
 // import {Readable} from "stream";
 // import {open fromFd, Entry, Options, ZipFile} from "yauzl";
@@ -6,13 +6,48 @@
 import {unzip} from "unzipit";
 import {readFile} from "node:fs/promises";
 
+const record_fields = new Set([
+  "Website",
+  "Order ID",
+  "Currency",
+  "Total Owed",
+  "Payment Instrument Type",
+  "Order Status",
+  "Product Name"
+]);
+
+function prune_record(record: any) {
+  let result: any = {};
+  for (const [key, value] of Object.entries(record)) {
+    if (record_fields.has(key)) {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
 (async function() {
-  const path = "/home/tromer/Downloads/Your Orders.zip";
+  const path = "/home/ted/Downloads/Your Orders.zip";
   const buf = await readFile(path);
   const {zip, entries} = await unzip(new Uint8Array(buf));
-  // print all entries and their sizes
-  for (const [name, entry] of Object.entries(entries)) {
-    console.log(name, entry.size);
+  const text = await entries["Retail.OrderHistory.1/Retail.OrderHistory.1.csv"].text();
+  const records = parse(
+    text,
+    {
+      "columns": true,
+      "cast": true,
+      "on_record": (record, context) => prune_record(record),
+      // "on_record": (record , context) => {
+      // 	return { 
+      // 	  "Order ID": record["Order ID"]
+      // 	  "Order Date": record["Order Date"]
+      //          "Currency": record["Currency"]
+      // 	}
+      // },
+      "to": 5  // TODO
+    });
+  for (const record of records) {
+    console.log(JSON.stringify(record, [""], ""));
   }
 })();
 
