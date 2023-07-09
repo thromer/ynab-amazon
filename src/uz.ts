@@ -116,23 +116,27 @@ function make_save_transaction(config: YnabConfig, order: Order): any { // TODO 
     return null;
   }
 
-/*
- TODO  
-  const ellipsis = "…";
   const split_product_name = function(input: string, maxLen: number, maxTrim = 15): [string, string] {
-    return [input, ""];
-    const alphanumeric = /(?:\p{Letter}|p{Number}\p{Mark}$/u;
+    input = input.trim();
+    const ellipsis = "…";
+    const pattern = /^(?:\p{Letter}|\p{Number}|\p{Mark})$/u;
     // Look back up to maxTrim characters for a non-alpha-numberic. Then give up.
     if (input.length <= maxLen) {
       return [input, ""];
     }
-    for (int i = 0; i < maxTrim; i--) {
-      if (input[maxLen-1-i]
+    let split_point = maxLen - 1;
+    for (let i = 0; i < maxTrim; i--) {
+      let pos = maxLen - 1 - i;
+      if (!input[pos].match(pattern)) {
+	split_point = pos;
+	break;
+      }
     }
-    
-    }
+    return [
+      input.slice(0, split_point).trim() + ellipsis, 
+      ellipsis + input.slice(split_point).trim()
+    ];
   }
-*/
   
   const needs_split = true; // TODO = closed_line_items.length > 0;
   let payee_name: string;
@@ -144,8 +148,8 @@ function make_save_transaction(config: YnabConfig, order: Order): any { // TODO 
     memo = `http://amazon.com/gp/your-account/order-details?orderID=${order.order_id}`;
     subtransactions = new Array<ynab.SaveSubTransaction>();
     for (const line_item of closed_line_items) {
-      let line_payee_name: string;
-      let line_memo: string;
+      const [line_payee_name, line_memo] = split_product_name(line_item.product_name, payeeMaxLength);
+      /* 
       if (line_item.product_name.length <= payeeMaxLength) {
 	line_payee_name = line_item.product_name;
 	line_memo = "";
@@ -158,6 +162,7 @@ function make_save_transaction(config: YnabConfig, order: Order): any { // TODO 
 	  line_memo = tail.slice(0, memoMaxLength-3) + "...";
 	}
       }
+      */
       subtransactions.push({
 	amount: line_item.total_owed_micro_units,
 	payee_name: line_payee_name,
